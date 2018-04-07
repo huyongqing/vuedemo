@@ -36,8 +36,8 @@
 </template>
 
 <script>
-import VSelection from '../components/base/selection'
-import VDatePicker from '../components/base/datepicker'
+import VSelection from '../../components/base/selection'
+import VDatePicker from '../../components/base/datepicker'
 import _ from 'lodash'
 export default {
   components: {
