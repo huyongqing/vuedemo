@@ -9,21 +9,23 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
-
-const express = require('express')
-const app = express()
-var appData = require('../data.json')//加载本地数据文件
-var seller = appData.seller//获取对应本地数据
-var goods = appData.goods
-var ratings = express.Router()
-app.use('/api',apiRoutes) //通过路由请求数据
+const axios = require('axios')
+const express = require('express')//node.js开发框架express，用来简化操作
+const apiServer = express()//创建express开发框架实例
+var appData = require('../db.json')//引用json地址
+var newsList = appData.getNewsList
+var amount = appData.getPrice
+var orderId = appData.createOrder
+var list = appData.getOrderList
+var apiRoutes = express.Router()
+apiServer.use('/api',apiRoutes) //通过路由请求数据
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
-    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
+    rules: utils.styleLoaders({sourceMap: config.dev.cssSourceMap, usePostCSS: true})
   },
   // cheap-module-eval-source-map is faster for development
   devtool: config.dev.devtool,
@@ -33,7 +35,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     clientLogLevel: 'warning',
     historyApiFallback: {
       rewrites: [
-        { from: /.*/, to: path.posix.join(config.dev.assetsPublicPath, 'index.html') },
+        {from: /.*/, to: path.posix.join(config.dev.assetsPublicPath, 'index.html')},
       ],
     },
     hot: true,
@@ -43,35 +45,44 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     port: PORT || config.dev.port,
     open: config.dev.autoOpenBrowser,
     overlay: config.dev.errorOverlay
-      ? { warnings: false, errors: true }
+      ? {warnings: false, errors: true}
       : false,
     publicPath: config.dev.assetsPublicPath,
     proxy: config.dev.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
-    }
+    },
+    before (app) {
+    app.get('/api/getNewsList', (req, res) => {
+      res.json({
+        errno: 0,
+        data:  newsList
+      })//接口返回json数据，上面配置的数据newsList就赋值给data请求后调用
+    }),
+      app.post('/api/getPrice', (req, res) => {
+      res.json({
+        errno: 0,
+        data: amount
+      })
+    }),
+        app.post('/api/createOrder', (req, res) => {
+      res.json({
+        errno: 0,
+        data:orderId
+      })
+    }),
+       app.post('/api/getOrderList', (req, res) => {
+      res.json({
+        errno: 0,
+        data:list
+      })
+    })
+
+    },
+
+
   },
-
-  before(app) {
-  app.get('/api/seller', (req, res) => {
-    res.json({
-      errno: 0,
-      data: seller
-    })//接口返回json数据，上面配置的数据seller就赋值给data请求后调用
-  }),
-  app.get('/api/goods', (req, res) => {
-    res.json({
-      errno: 0,
-      data: goods
-    })
-  }),
-  app.get('/api/ratings', (req, res) => {
-    res.json({
-      errno: 0,
-      data: ratings
-    })
-
 
   plugins: [
     new webpack.DefinePlugin({
@@ -122,3 +133,4 @@ module.exports = new Promise((resolve, reject) => {
     }
   })
 })
+
