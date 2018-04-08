@@ -36,9 +36,8 @@
 </template>
 
 <script>
-import VSelection from '../../components/base/selection'
-import VDatePicker from '../../components/base/datepicker'
-import _ from 'lodash'
+import VSelection from '../components/base/selection'
+import VDatePicker from '../components/base/datepicker'
 export default {
   components: {
     VSelection,
@@ -103,7 +102,7 @@ export default {
     }
   },
   watch: {
-    query () {
+    query (){
       this.getList()
     }
   },
@@ -151,6 +150,8 @@ export default {
   },
   mounted () {
     this.getList()
+    // this.getTableData()
+    console.log(this.$store)
   }
 }
 </script>

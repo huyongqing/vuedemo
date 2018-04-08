@@ -77,6 +77,12 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         errno: 0,
         data:list
       })
+    }),
+       app.post('/api/checkOrder', (req, res) => {
+      res.json({
+        errno: 0,
+        data:orderId
+      })
     })
 
     },
