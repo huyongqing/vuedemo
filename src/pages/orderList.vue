@@ -8,6 +8,11 @@
       </div>
 
       <div class="order-list-option">
+        选择产品2：
+        <v-selection :selections="products" @on-change="productChange"></v-selection>
+      </div>
+
+      <div class="order-list-option">
         开始日期：
         <v-date-picker @on-change="getStartDate"></v-date-picker>
       </div>
@@ -31,6 +36,10 @@
           <td v-for="head in tableHeads">{{ item[head.key] }}</td>
         </tr>
       </table>
+      <v-pagenation
+        :total = "total"
+        :pageSize="pageSize"
+        @on-change="onPageChange"></v-pagenation>
     </div>
   </div>
 </template>
@@ -101,30 +110,48 @@ export default {
       tableData: []
     }
   },
+  computed:{
+    tableData(){
+      return this.$store.getters.getOrderList
+    }
+  },
   watch: {
     query (){
-      this.getList()
+      // this.getList()
+      this.getTableData()
     }
   },
   methods: {
     productChange (obj) {
-      this.productId = obj.value
-      this.getList()
+      this.$store.commit('updateParams',{
+        key :'productId' ,
+        val:obj.value
+      })
+      this.$store.dispatch('fetchOrderList')
+      // this.productId = obj.value
+      // this.getTableData()
+      // this.getList()
     },
-    getStartDate (date) {
-      this.startDate = date
-      this.getList()
+    changeStartDate (date) {
+    this.$store.commit('updateParams',{
+      key:'startDate',
+      val:date
+    })
+      this.$store.dispatch('fetchOrderList')
     },
-    getEndDate (date) {
+    changeEndDate (date) {
       this.endDate = date
-      this.getList()
+      this.getTableData()
+      // this.getList()
     },
-    getList () {
+    getTableData () {
       let reqParams = {
         query: this.query,
         productId: this.productId,
         startDate: this.startDate,
-        endDate: this.endDate
+        endDate: this.endDate,
+        offset:this.offset,
+        pageSize:this.pageSize
       }
       this.$http.post('/api/getOrderList', reqParams)
       .then((res) => {
@@ -146,11 +173,16 @@ export default {
         this.currentOrder = 'asc'
       }
       this.tableData = _.orderBy(this.tableData, headItem.key, this.currentOrder)
+    },
+    onPageChange(offset){
+      this.offset = offset
+      this.getTableData()
     }
   },
   mounted () {
-    this.getList()
+    // this.getList()
     // this.getTableData()
+    this.$store.dispatch('fetchOrderList')
     console.log(this.$store)
   }
 }
